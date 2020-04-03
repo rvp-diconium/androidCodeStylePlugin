@@ -7,6 +7,7 @@ import org.junit.Before
 import org.junit.Test
 
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 
 /*
@@ -23,6 +24,9 @@ import java.nio.file.Files
     yes    	|   no	    |   available       v
     yes     |   yes	    |   empty           v
     yes	    |   no	    |   empty           v
+    --------------------------------------------
+
+    At the end a couple of tests for the throw exception cases
  */
 private const val TEST_FOLDER = "cachedDownloadHandlerTest"
 
@@ -67,12 +71,17 @@ class CachedDownloadHandlerTest {
         testHomeDir.deleteRecursively()
     }
 
-    private fun createTestUnit(force: Boolean): CachedDownloadHandler {
-        val fileDownloader: FileDownloader = { _, target ->
-            // don't really download, just copy over
-            CachedDownloadTask.fileCopier(remoteFile, target)
-            target.setLastModified(System.currentTimeMillis() + 2000)
-        }
+    private fun createTestUnit(
+        force: Boolean,
+        optionalFileDownloader: FileDownloader? = null
+    ): CachedDownloadHandler {
+
+        val fileDownloader: FileDownloader =
+            optionalFileDownloader ?: { _, target ->
+                // don't really download, just copy over
+                CachedDownloadTask.fileCopier(remoteFile, target)
+                target.setLastModified(System.currentTimeMillis() + 2000)
+            }
 
         val fileCopier: FileCopier = { source, target ->
             //force copied files to have different time stamps
@@ -311,6 +320,30 @@ class CachedDownloadHandlerTest {
         tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
+    }
+
+    @Test(expected = Exception::class)
+    fun download_throws_exception_first_run() {
+        targetFile.delete()
+        cacheFile.delete()
+        val tested = createTestUnit(false) { _, _ -> throw IOException("404") }
+        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+    }
+
+    @Test
+    fun download_throws_exception_target_exists() {
+        targetFile.touch(OLD_CONTENTS)
+        cacheFile.delete()
+        val tested = createTestUnit(false) { _, _ -> throw IOException("404") }
+        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+    }
+
+    @Test(expected = Exception::class)
+    fun download_throws_exception_force() {
+        targetFile.touch(OLD_CONTENTS)
+        cacheFile.delete()
+        val tested = createTestUnit(true) { _, _ -> throw IOException("404") }
+        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
     }
 
     // helpers
