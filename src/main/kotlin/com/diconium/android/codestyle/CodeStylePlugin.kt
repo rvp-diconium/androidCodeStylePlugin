@@ -3,25 +3,37 @@ package com.diconium.android.codestyle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
-import java.lang.IllegalArgumentException
 
 class CodeStylePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val config = target.extensions.create("codestyle", CodeStyleConfig::class.java)
         target.afterEvaluate {
+
+            // this executes every time the project is evaluated
+            // so here we ignore `force` flag, uses cache
+            CachedDownloadHandler.downloadNow(
+                config.downloads,
+                config.useCache,
+                false,
+                config.debug,
+                config.maxCacheAge,
+                getDownloadDir(target, config)
+            )
+
+            // task is added to the gradle tasks
+            // and can be executed manually
             target.tasks.create(
                 "downloadCodeStyle",
                 CachedDownloadTask::class.java
             ) {
-                group = "build setup"
+                group = "help"
                 downloads = config.downloads
-                fileName = "test.dat"
                 useCache = config.useCache
                 force = config.force
                 outputDir = getDownloadDir(target, config)
                 maxCacheAge = config.maxCacheAge
 
-                if (force) {
+                if (config.force) {
                     outputs.upToDateWhen {
                         false
                     }
@@ -31,6 +43,8 @@ class CodeStylePlugin : Plugin<Project> {
     }
 
     companion object {
+
+
         internal fun getDownloadDir(target: Project, config: CodeStyleConfig): File {
             return if (config.downloadDir.isBlank()) {
                 File(target.rootProject.rootDir, ".idea/codeStyles").also {
@@ -52,5 +66,4 @@ class CodeStylePlugin : Plugin<Project> {
             }
         }
     }
-
 }

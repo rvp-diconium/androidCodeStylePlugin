@@ -136,4 +136,31 @@ class CachedDownloadHandler(
         cacheDir?.let { validateFolder(it) }
     }
 
+    companion object {
+        internal fun downloadNow(
+            downloads: Map<String, String>,
+            useCache: Boolean,
+            force: Boolean,
+            debug: Boolean,
+            maxCacheAge: Long,
+            outputDir: File
+        ) {
+            val downloader = CachedDownloadHandler(
+                CachedDownloadTask.stringValidator,
+                CachedDownloadTask.folderValidator,
+                CachedDownloadTask.cacheNameGenerator,
+                CachedDownloadTask.fileDownloader,
+                CachedDownloadTask.fileCopier,
+                CachedDownloadTask.fileMover,
+                CachedDownloadTask.compareFiles,
+                force,
+                maxCacheAge,
+                if (debug) ::println else ({}),
+                outputDir,
+                if (useCache) CachedDownloadTask.getCacheFolder() else null
+            )
+            downloads.forEach(downloader::execute)
+        }
+    }
+
 }

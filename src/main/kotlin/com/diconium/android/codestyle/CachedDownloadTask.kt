@@ -25,16 +25,13 @@ open class CachedDownloadTask : DefaultTask() {
     lateinit var downloads: Map<String, String>
 
     @Input
-    lateinit var fileName: String
-
-    @Input
     var useCache: Boolean = true
 
     @Input
     var force: Boolean = false
 
     @Input
-    var debug = false
+    var debug:Boolean = false
 
     @Input
     var maxCacheAge: Long = MAX_CACHE_AGE
@@ -44,21 +41,14 @@ open class CachedDownloadTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        val downloader = CachedDownloadHandler(
-            stringValidator,
-            folderValidator,
-            cacheNameGenerator,
-            fileDownloader,
-            fileCopier,
-            fileMover,
-            compareFiles,
+        CachedDownloadHandler.downloadNow(
+            downloads,
+            useCache,
             force,
+            debug,
             maxCacheAge,
-            if (debug) ::println else ({}),
-            outputDir,
-            if (useCache) getCacheFolder() else null
+            outputDir
         )
-        downloads.forEach(downloader::execute)
     }
 
     companion object {
@@ -134,7 +124,7 @@ open class CachedDownloadTask : DefaultTask() {
             }
         }
 
-        private val fileDownloader: FileDownloader = { urlString, destination ->
+        internal val fileDownloader: FileDownloader = { urlString, destination ->
             var outputStream: OutputStream? = null
             val conn: URLConnection
             var inputStream: InputStream? = null
