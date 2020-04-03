@@ -2,7 +2,6 @@ package com.diconium.android.codestyle
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.DefaultTask
-import org.gradle.api.internal.TaskOutputsInternal
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -15,6 +14,7 @@ import java.nio.file.StandardCopyOption
 import java.util.*
 
 private const val BUFFER_SIZE = 10 * 1024
+internal const val MAX_CACHE_AGE = 1000L * 60 * 60 * 24
 internal const val USER_HOME = "user.home"
 internal const val GRADLE_FOLDER = ".gradle"
 internal const val CACHE_FOLDER = ".gradle/caches/modules-2/files-2.1/com.diconium.android.codestyle/filesCache/"
@@ -33,6 +33,12 @@ open class CachedDownloadTask : DefaultTask() {
     @Input
     var force: Boolean = false
 
+    @Input
+    var debug = false
+
+    @Input
+    var maxCacheAge: Long = MAX_CACHE_AGE
+
     @OutputDirectory
     lateinit var outputDir: File
 
@@ -46,7 +52,9 @@ open class CachedDownloadTask : DefaultTask() {
             fileCopier,
             fileMover,
             compareFiles,
-            force
+            force,
+            maxCacheAge,
+            if (debug) ::println else ({})
         )
         download.execute(
             sourceUrl,
@@ -85,9 +93,7 @@ open class CachedDownloadTask : DefaultTask() {
 
         internal val folderValidator: FolderValidator = { folder ->
             if (!folder.exists()) {
-                if (folder.mkdirs()) {
-                    println("Created ${folder.path}")
-                } else {
+                if (!folder.mkdirs()) {
                     throw FileNotFoundException("Can't create ${folder.path}")
                 }
             }

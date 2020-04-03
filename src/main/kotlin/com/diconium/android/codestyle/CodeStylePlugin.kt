@@ -20,6 +20,7 @@ class CodeStylePlugin : Plugin<Project> {
                 useCache = config.useCache
                 force = config.force
                 outputDir = ideaFolder
+                maxCacheAge = config.maxCacheAge
 
                 if (force) {
                     outputs.upToDateWhen {

@@ -6,4 +6,6 @@ open class CodeStyleConfig {
     var downloadUrl: String = DEFAULT_URL
     var useCache: Boolean = true
     var force: Boolean = false
+    var maxCacheAge: Long = MAX_CACHE_AGE
+    var debug = true
 }

@@ -9,6 +9,7 @@ typealias FileCopier = (File, File) -> Unit
 typealias CacheNameGenerator = (String, String) -> String
 typealias FileMover = (File, File) -> Unit
 typealias FileComparison = (File, File) -> Boolean
+typealias Logger = (String) -> Unit
 
 class CachedDownloadHandler(
     private val validateString: StringValidator,
@@ -18,7 +19,9 @@ class CachedDownloadHandler(
     private val copyFile: FileCopier,
     private val moveFile: FileMover,
     private val isTheSame: FileComparison,
-    private val forceOverwrite: Boolean
+    private val forceOverwrite: Boolean,
+    private val maxCacheAge: Long,
+    private val log: Logger
 ) {
     internal fun execute(
         sourceUrl: String,
@@ -35,6 +38,7 @@ class CachedDownloadHandler(
         try {
             if (cacheDir != null) {
                 // runs with cache
+                log("Running downloader with cache")
                 val cacheFileName = generateCacheFileName(sourceUrl, fileName)
                 val cacheFile = File(cacheDir, cacheFileName)
                 tempFile = File(cacheDir, "$cacheFileName.tmp")
@@ -42,21 +46,22 @@ class CachedDownloadHandler(
                 executeWithCache(sourceUrl, destinationFile, tempFile, cacheFile)
             } else {
                 // runs without cache
+                log("Running downloader without cache")
                 tempFile = File(outputDir, "$fileName.tmp")
                 tempFile.deleteOnExit()
                 executeWithoutCache(sourceUrl, destinationFile, tempFile)
             }
         } catch (e: Exception) {
-            println("Downloader execution failed. ${e.message}")
             if (forceOverwrite) {
                 throw e
             }
+            log("File download failed. ${e.message}.")
             maybeException = e
         } finally {
             tempFile?.delete()
         }
 
-        // only fails the task with the destination file does not exist
+        // fails the task if the destination file does not exist
         if (!destinationFile.exists()) {
             throw maybeException ?: IllegalStateException("Downloader execution failed with unknown error")
         }
@@ -69,17 +74,40 @@ class CachedDownloadHandler(
         cacheFile: File
     ) {
 
-        println("Downloading from $sourceUrl to ${tempFile.path}")
-        downloadFile(sourceUrl, tempFile)
+        if (needsUpdateCache(cacheFile)) {
+            log("Downloading from $sourceUrl to ${tempFile.path}")
+            downloadFile(sourceUrl, tempFile)
 
-        // move temp to cache
-        println("Moving downloaded file to cache")
-        moveFile(tempFile, cacheFile)
-
-        if (forceOverwrite || !isTheSame(cacheFile, destinationFile)) {
-            println("Copying file from ${cacheFile.path} to ${destinationFile.path}")
-            copyFile(cacheFile, destinationFile)
+            // move temp to cache
+            log("Moving downloaded file to cache")
+            moveFile(tempFile, cacheFile)
+        } else {
+            log("Cache file is up-to-date")
         }
+
+        if (needsUpdateTarget(cacheFile, destinationFile)) {
+            log("Copying file from ${cacheFile.path} to ${destinationFile.path}")
+            copyFile(cacheFile, destinationFile)
+        } else {
+            log("File at destination up-to-date with cache")
+        }
+    }
+
+    private fun needsUpdateCache(cached: File): Boolean {
+        return forceOverwrite
+                || !cached.exists()
+                || isOldFile(cached)
+    }
+
+    private fun needsUpdateTarget(from: File, target: File): Boolean {
+        return forceOverwrite
+                || !target.exists()
+                || !isTheSame(from, target)
+    }
+
+
+    private fun isOldFile(file: File): Boolean {
+        return (System.currentTimeMillis() - file.lastModified() > maxCacheAge)
     }
 
     private fun executeWithoutCache(
@@ -88,12 +116,14 @@ class CachedDownloadHandler(
         tempFile: File
     ) {
 
-        println("Downloading from $sourceUrl to ${tempFile.path}")
+        log("Downloading from $sourceUrl to ${tempFile.path}")
         downloadFile(sourceUrl, tempFile)
 
-        if (forceOverwrite || !isTheSame(tempFile, destinationFile)) {
-            println("Moving file from ${tempFile.path} to ${destinationFile.path}")
+        if (needsUpdateTarget(tempFile, destinationFile)) {
+            log("Moving file from ${tempFile.path} to ${destinationFile.path}")
             moveFile(tempFile, destinationFile)
+        } else {
+            log("File at destination up-to-date with source")
         }
     }
 

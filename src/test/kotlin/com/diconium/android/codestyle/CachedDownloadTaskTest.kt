@@ -8,6 +8,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 
+private const val TEST_FOLDER = "cachedDownloadTaskTest"
+
 class CachedDownloadTaskTest {
 
     // used on the `getCacheFolder` tests
@@ -26,7 +28,7 @@ class CachedDownloadTaskTest {
     @Test
     fun getCacheFolder_returns_gradle_cache_folder_if_all_exist() {
         // prepare file system for test
-        val testHome = Files.createTempDirectory("unit_test").toFile()
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
         val gradleFolder = File(testHome, CACHE_FOLDER)
         testHome.deleteOnExit()
         gradleFolder.deleteOnExit()
@@ -45,7 +47,7 @@ class CachedDownloadTaskTest {
     @Test
     fun getCacheFolder_returns_null_if_any_does_not_exist() {
         // prepare file system for test
-        val testHome = Files.createTempDirectory("unit_test").toFile()
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
         testHome.deleteOnExit()
         testHome.mkdirs()
 
@@ -89,7 +91,7 @@ class CachedDownloadTaskTest {
     @Test
     fun file_mover_moves_file() {
         // prepare file system for test
-        val testHome = Files.createTempDirectory("unit_test").toFile()
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
         testHome.deleteOnExit()
 
         val source = File(testHome, "source")
@@ -114,7 +116,7 @@ class CachedDownloadTaskTest {
     @Test
     fun file_copier_copies_file() {
         // prepare file system for test
-        val testHome = Files.createTempDirectory("unit_test").toFile()
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
         testHome.deleteOnExit()
 
         val source = File(testHome, "source")
@@ -139,7 +141,7 @@ class CachedDownloadTaskTest {
 
     @Test
     fun compare_files_returns_true_equal_content_files() {
-        val testHome = Files.createTempDirectory("unit_test").toFile()
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
         testHome.deleteOnExit()
 
         val content = "lorem ipsum"
@@ -152,10 +154,9 @@ class CachedDownloadTaskTest {
     }
 
 
-
     @Test
     fun compare_files_returns_false_different_content_files() {
-        val testHome = Files.createTempDirectory("unit_test").toFile()
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
         testHome.deleteOnExit()
 
         val f1 = File(testHome, "f1")
@@ -168,11 +169,7 @@ class CachedDownloadTaskTest {
 
     // helper
     companion object {
-        private fun File.touch(content: String? = null) {
-            if (this.exists()) {
-                return
-            }
-
+         fun File.touch(content: String? = null) {
             val stream = FileOutputStream(this)
             content?.let { stream.write(it.toByteArray()) }
             stream.close()

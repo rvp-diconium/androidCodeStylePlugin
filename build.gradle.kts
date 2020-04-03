@@ -16,6 +16,7 @@ apply {
 
 plugins {
     `kotlin-dsl`
+    jacoco
 }
 
 extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codestyle") {
@@ -31,4 +32,17 @@ repositories {
 dependencies {
     implementation("commons-codec:commons-codec:1.14")
     testImplementation("junit:junit:4.13")
+    testImplementation("org.mockito:mockito-core:3.3.3")
+    testImplementation("org.mockito:mockito-inline:3.3.3")
+}
+
+tasks.create("cleanBuildTestJacoco") {
+    group = "build"
+    dependsOn("clean")
+    finalizedBy(
+        "assemble",
+        "test",
+        "build",
+        "jacocoTestReport"
+    )
 }
