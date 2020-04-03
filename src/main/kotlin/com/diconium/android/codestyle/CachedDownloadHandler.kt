@@ -21,14 +21,11 @@ class CachedDownloadHandler(
     private val isTheSame: FileComparison,
     private val forceOverwrite: Boolean,
     private val maxCacheAge: Long,
-    private val log: Logger
+    private val log: Logger,
+    private val outputDir: File,
+    private val cacheDir: File?
 ) {
-    internal fun execute(
-        sourceUrl: String,
-        fileName: String,
-        outputDir: File,
-        cacheDir: File?
-    ) {
+    internal fun execute(fileName: String, sourceUrl: String) {
 
         // validate inputs
         validateInputs(sourceUrl, fileName, outputDir, cacheDir)

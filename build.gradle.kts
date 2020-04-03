@@ -20,8 +20,11 @@ plugins {
 }
 
 extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codestyle") {
-    useCache = true
-    force = false
+    downloads = mapOf(
+        "readme.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/README.md",
+        "main.java.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/main/src/main/java/com/budius/chromecast/converter/Main.java"
+    )
+    //downloadDir = "$rootDir/temp_downloads/"
 }
 
 repositories {

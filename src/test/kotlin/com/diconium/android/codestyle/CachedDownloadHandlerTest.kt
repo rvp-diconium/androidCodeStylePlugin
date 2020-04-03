@@ -73,6 +73,7 @@ class CachedDownloadHandlerTest {
 
     private fun createTestUnit(
         force: Boolean,
+        cacheDir: File?,
         optionalFileDownloader: FileDownloader? = null
     ): CachedDownloadHandler {
 
@@ -100,7 +101,9 @@ class CachedDownloadHandlerTest {
             CachedDownloadTask.compareFiles,
             force,
             MAX_CACHE_AGE,
-            ({})
+            ({}),
+            outputDir,
+            cacheDir
         )
     }
 
@@ -108,8 +111,8 @@ class CachedDownloadHandlerTest {
     fun no_cache_force_target_downloaded() {
         targetFile.touch(DOWNLOAD_CONTENTS)
         val targetModified = targetFile.lastModified()
-        val tested = createTestUnit(true)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, null)
+        val tested = createTestUnit(true, null)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertNotEquals(targetModified, targetFile.lastModified())
     }
@@ -117,8 +120,8 @@ class CachedDownloadHandlerTest {
     @Test
     fun no_cache_force_no_target() {
         targetFile.delete()
-        val tested = createTestUnit(true)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, null)
+        val tested = createTestUnit(true, null)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
     }
 
@@ -126,8 +129,8 @@ class CachedDownloadHandlerTest {
     fun no_cache_no_force_target_downloaded_different_content() {
         targetFile.touch(OLD_CONTENTS)
         val targetModified = targetFile.lastModified()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, null)
+        val tested = createTestUnit(false, null)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertNotEquals(targetModified, targetFile)
     }
@@ -136,8 +139,8 @@ class CachedDownloadHandlerTest {
     fun no_cache_no_force_target_downloaded_same_content() {
         targetFile.touch(DOWNLOAD_CONTENTS)
         val targetModified = targetFile.lastModified()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, null)
+        val tested = createTestUnit(false, null)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(targetModified, targetFile.lastModified())
     }
@@ -145,8 +148,8 @@ class CachedDownloadHandlerTest {
     @Test
     fun no_cache_no_force_no_target() {
         targetFile.delete()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, null)
+        val tested = createTestUnit(false, null)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
     }
 
@@ -157,8 +160,8 @@ class CachedDownloadHandlerTest {
         cacheFile.touch(DOWNLOAD_CONTENTS)
         cacheFile.setLastModified(oldAge())
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(true)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(true, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertNotEquals(targetModified, targetFile.lastModified())
@@ -171,8 +174,8 @@ class CachedDownloadHandlerTest {
         cacheFile.touch(DOWNLOAD_CONTENTS)
         cacheFile.setLastModified(oldAge())
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(true)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(true, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertNotEquals(cacheModified, cacheFile.lastModified())
@@ -185,8 +188,8 @@ class CachedDownloadHandlerTest {
         cacheFile.touch(DOWNLOAD_CONTENTS)
         cacheFile.setLastModified(oldAge())
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertEquals(targetModified, targetFile.lastModified())
@@ -200,8 +203,8 @@ class CachedDownloadHandlerTest {
         cacheFile.touch(DOWNLOAD_CONTENTS)
         cacheFile.setLastModified(oldAge())
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertNotEquals(targetModified, targetFile.lastModified())
@@ -214,8 +217,8 @@ class CachedDownloadHandlerTest {
         cacheFile.touch(DOWNLOAD_CONTENTS)
         cacheFile.setLastModified(oldAge())
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertNotEquals(cacheModified, cacheFile.lastModified())
@@ -227,8 +230,8 @@ class CachedDownloadHandlerTest {
         val targetModified = targetFile.lastModified()
         cacheFile.touch(OLD_CONTENTS)
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(true)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(true, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertNotEquals(targetModified, targetFile.lastModified())
@@ -241,8 +244,8 @@ class CachedDownloadHandlerTest {
         val targetModified = targetFile.lastModified()
         cacheFile.touch(OLD_CONTENTS)
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(cacheFile, targetFile)
         assertNotEquals(remoteFile, cacheFile)
         assertEquals(targetModified, targetFile.lastModified())
@@ -255,8 +258,8 @@ class CachedDownloadHandlerTest {
         val targetModified = targetFile.lastModified()
         cacheFile.touch(OLD_CONTENTS)
         val cacheModified = cacheFile.lastModified()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(cacheFile, targetFile)
         assertNotEquals(remoteFile, cacheFile)
         assertNotEquals(targetModified, targetFile.lastModified())
@@ -271,8 +274,8 @@ class CachedDownloadHandlerTest {
         targetFile.touch(DOWNLOAD_CONTENTS)
         val targetModified = targetFile.lastModified()
         cacheFile.delete()
-        val tested = createTestUnit(true)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(true, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertNotEquals(targetModified, targetFile.lastModified())
@@ -282,8 +285,8 @@ class CachedDownloadHandlerTest {
     fun use_cache_force_empty_no_target() {
         targetFile.delete()
         cacheFile.delete()
-        val tested = createTestUnit(true)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(true, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
     }
@@ -293,8 +296,8 @@ class CachedDownloadHandlerTest {
         targetFile.touch(DOWNLOAD_CONTENTS)
         val targetModified = targetFile.lastModified()
         cacheFile.delete()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertEquals(targetModified, targetFile.lastModified())
@@ -305,8 +308,8 @@ class CachedDownloadHandlerTest {
         targetFile.touch(OLD_CONTENTS)
         val targetModified = targetFile.lastModified()
         cacheFile.delete()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
         assertNotEquals(targetModified, targetFile.lastModified())
@@ -316,8 +319,8 @@ class CachedDownloadHandlerTest {
     fun use_cache_no_force_empty_no_target() {
         targetFile.delete()
         cacheFile.delete()
-        val tested = createTestUnit(false)
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(false, cacheDir)
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
         assertEquals(remoteFile, targetFile)
         assertEquals(remoteFile, cacheFile)
     }
@@ -326,24 +329,30 @@ class CachedDownloadHandlerTest {
     fun download_throws_exception_first_run() {
         targetFile.delete()
         cacheFile.delete()
-        val tested = createTestUnit(false) { _, _ -> throw IOException("404") }
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(
+            false, cacheDir
+        ) { _, _ -> throw IOException("404") }
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
     }
 
     @Test
     fun download_throws_exception_target_exists() {
         targetFile.touch(OLD_CONTENTS)
         cacheFile.delete()
-        val tested = createTestUnit(false) { _, _ -> throw IOException("404") }
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(
+            false, cacheDir
+        ) { _, _ -> throw IOException("404") }
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
     }
 
     @Test(expected = Exception::class)
     fun download_throws_exception_force() {
         targetFile.touch(OLD_CONTENTS)
         cacheFile.delete()
-        val tested = createTestUnit(true) { _, _ -> throw IOException("404") }
-        tested.execute(DOWNLOAD_URL, FILE_NAME, outputDir, cacheDir)
+        val tested = createTestUnit(
+            true, cacheDir
+        ) { _, _ -> throw IOException("404") }
+        tested.execute(FILE_NAME, DOWNLOAD_URL)
     }
 
     // helpers

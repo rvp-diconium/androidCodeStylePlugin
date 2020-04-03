@@ -22,7 +22,7 @@ internal const val CACHE_FOLDER = ".gradle/caches/modules-2/files-2.1/com.diconi
 open class CachedDownloadTask : DefaultTask() {
 
     @Input
-    lateinit var sourceUrl: String
+    lateinit var downloads: Map<String, String>
 
     @Input
     lateinit var fileName: String
@@ -44,7 +44,7 @@ open class CachedDownloadTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        val download = CachedDownloadHandler(
+        val downloader = CachedDownloadHandler(
             stringValidator,
             folderValidator,
             cacheNameGenerator,
@@ -54,14 +54,11 @@ open class CachedDownloadTask : DefaultTask() {
             compareFiles,
             force,
             maxCacheAge,
-            if (debug) ::println else ({})
-        )
-        download.execute(
-            sourceUrl,
-            fileName,
+            if (debug) ::println else ({}),
             outputDir,
             if (useCache) getCacheFolder() else null
         )
+        downloads.forEach(downloader::execute)
     }
 
     companion object {
