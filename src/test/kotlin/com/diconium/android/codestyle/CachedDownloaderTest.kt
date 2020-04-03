@@ -1,6 +1,6 @@
 package com.diconium.android.codestyle
 
-import com.diconium.android.codestyle.CachedDownloadTaskTest.Companion.touch
+import com.diconium.android.codestyle.HelpersTest.Companion.touch
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -28,7 +28,7 @@ import java.nio.file.Files
 
     At the end a couple of tests for the throw exception cases
  */
-private const val TEST_FOLDER = "cachedDownloadHandlerTest"
+private const val TEST_FOLDER = "CachedDownloaderTest"
 
 private const val DOWNLOAD_URL = "http://doenst/matter"
 private const val FILE_NAME = "downloaded.txt"
@@ -36,7 +36,7 @@ private const val DOWNLOAD_CONTENTS = "lorem ipsum"
 private const val OLD_CONTENTS = "old"
 private const val CACHE_FILE_NAME = "cachefile"
 
-class CachedDownloadHandlerTest {
+class CachedDownloaderTest {
 
     private lateinit var testHomeDir: File
     private lateinit var cacheDir: File
@@ -75,30 +75,30 @@ class CachedDownloadHandlerTest {
         force: Boolean,
         cacheDir: File?,
         optionalFileDownloader: FileDownloader? = null
-    ): CachedDownloadHandler {
+    ): CachedDownloader {
 
         val fileDownloader: FileDownloader =
             optionalFileDownloader ?: { _, target ->
                 // don't really download, just copy over
-                CachedDownloadTask.fileCopier(remoteFile, target)
+                Helpers.fileCopier(remoteFile, target)
                 target.setLastModified(System.currentTimeMillis() + 2000)
             }
 
         val fileCopier: FileCopier = { source, target ->
             //force copied files to have different time stamps
             // this way we can assert that the file was overwritten
-            CachedDownloadTask.fileCopier(source, target)
+            Helpers.fileCopier(source, target)
             target.setLastModified(System.currentTimeMillis() + 2000)
         }
         val cacheNameGenerator: CacheNameGenerator = { _, _ -> CACHE_FILE_NAME }
-        return CachedDownloadHandler(
-            CachedDownloadTask.stringValidator,
-            CachedDownloadTask.folderValidator,
+        return CachedDownloader(
+            Helpers.stringValidator,
+            Helpers.folderValidator,
             cacheNameGenerator,
             fileDownloader,
             fileCopier,
-            CachedDownloadTask.fileMover,
-            CachedDownloadTask.compareFiles,
+            Helpers.fileMover,
+            Helpers.compareFiles,
             force,
             MAX_CACHE_AGE,
             ({}),
@@ -357,13 +357,12 @@ class CachedDownloadHandlerTest {
 
     // helpers
     companion object {
-
         private fun assertEquals(f1: File, f2: File) {
-            assertTrue(CachedDownloadTask.compareFiles(f1, f2))
+            assertTrue(Helpers.compareFiles(f1, f2))
         }
 
         private fun assertNotEquals(f1: File, f2: File) {
-            assertFalse(CachedDownloadTask.compareFiles(f1, f2))
+            assertFalse(Helpers.compareFiles(f1, f2))
         }
 
         private fun oldAge(): Long {

@@ -13,7 +13,7 @@ class CodeStylePlugin : Plugin<Project> {
 
             // this executes every time the project is evaluated
             // so here we ignore `force` flag, uses cache
-            CachedDownloadHandler.downloadNow(
+            CachedDownloader.downloadNow(
                 config.downloads,
                 cache,
                 false,

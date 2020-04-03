@@ -6,30 +6,30 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 
-private const val TEST_FOLDER = "cachedDownloadTaskTest"
+private const val TEST_FOLDER = "HelpersTest"
 
-class CachedDownloadTaskTest {
+class HelpersTest {
 
     @Test
     fun string_validator_pass_for_valid_strings() {
-        CachedDownloadTask.stringValidator("lorem ipsum")
+        Helpers.stringValidator("lorem ipsum")
     }
 
     @Test(expected = Exception::class)
     fun string_validator_throw_for_empty_string() {
-        CachedDownloadTask.stringValidator("")
+        Helpers.stringValidator("")
     }
 
     @Test(expected = Exception::class)
     fun string_validator_throw_for_blank_string() {
-        CachedDownloadTask.stringValidator("  ")
+        Helpers.stringValidator("  ")
     }
 
     @Test(expected = Exception::class)
     fun folder_validator_throw_for_not_a_folder() {
         val temp = Files.createTempFile("foo", "bar").toFile()
         temp.touch()
-        CachedDownloadTask.folderValidator(temp)
+        Helpers.folderValidator(temp)
         temp.delete()
     }
 
@@ -47,7 +47,7 @@ class CachedDownloadTaskTest {
 
         assert(source.exists())
         assert(!target.exists())
-        CachedDownloadTask.fileMover(source, target)
+        Helpers.fileMover(source, target)
         assert(target.exists())
         assert(!source.exists())
 
@@ -72,7 +72,7 @@ class CachedDownloadTaskTest {
 
         assert(source.exists())
         assert(!target.exists())
-        CachedDownloadTask.fileCopier(source, target)
+        Helpers.fileCopier(source, target)
         assert(target.exists())
         assert(source.exists())
 
@@ -95,7 +95,7 @@ class CachedDownloadTaskTest {
         val f2 = File(testHome, "f2")
         f2.touch(content)
 
-        assertTrue(CachedDownloadTask.compareFiles(f1, f2))
+        assertTrue(Helpers.compareFiles(f1, f2))
     }
 
 
@@ -109,7 +109,7 @@ class CachedDownloadTaskTest {
         val f2 = File(testHome, "f2")
         f2.touch("loremipsum")
 
-        assertFalse(CachedDownloadTask.compareFiles(f1, f2))
+        assertFalse(Helpers.compareFiles(f1, f2))
     }
 
     // helper

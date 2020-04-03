@@ -2,16 +2,7 @@ package com.diconium.android.codestyle
 
 import java.io.File
 
-typealias StringValidator = (String) -> Unit
-typealias FolderValidator = (File) -> Unit
-typealias FileDownloader = (String, File) -> Unit
-typealias FileCopier = (File, File) -> Unit
-typealias CacheNameGenerator = (String, String) -> String
-typealias FileMover = (File, File) -> Unit
-typealias FileComparison = (File, File) -> Boolean
-typealias Logger = (String) -> Unit
-
-class CachedDownloadHandler(
+class CachedDownloader(
     private val validateString: StringValidator,
     private val validateFolder: FolderValidator,
     private val generateCacheFileName: CacheNameGenerator,
@@ -145,14 +136,14 @@ class CachedDownloadHandler(
             maxCacheAge: Long,
             outputDir: File
         ) {
-            val downloader = CachedDownloadHandler(
-                CachedDownloadTask.stringValidator,
-                CachedDownloadTask.folderValidator,
-                CachedDownloadTask.cacheNameGenerator,
-                CachedDownloadTask.fileDownloader,
-                CachedDownloadTask.fileCopier,
-                CachedDownloadTask.fileMover,
-                CachedDownloadTask.compareFiles,
+            val downloader = CachedDownloader(
+                Helpers.stringValidator,
+                Helpers.folderValidator,
+                Helpers.cacheNameGenerator,
+                Helpers.fileDownloader,
+                Helpers.fileCopier,
+                Helpers.fileMover,
+                Helpers.compareFiles,
                 force,
                 maxCacheAge,
                 if (debug) ::println else ({}),
