@@ -9,11 +9,13 @@ class CodeStylePlugin : Plugin<Project> {
         val config = target.extensions.create("codestyle", CodeStyleConfig::class.java)
         target.afterEvaluate {
 
+            val cache = getCacheFolder(config.useCache)
+
             // this executes every time the project is evaluated
             // so here we ignore `force` flag, uses cache
             CachedDownloadHandler.downloadNow(
                 config.downloads,
-                config.useCache,
+                cache,
                 false,
                 config.debug,
                 config.maxCacheAge,
@@ -28,7 +30,7 @@ class CodeStylePlugin : Plugin<Project> {
             ) {
                 group = "help"
                 downloads = config.downloads
-                useCache = config.useCache
+                cacheDir = cache?.absolutePath
                 force = config.force
                 outputDir = getDownloadDir(target, config)
                 maxCacheAge = config.maxCacheAge
@@ -43,7 +45,6 @@ class CodeStylePlugin : Plugin<Project> {
     }
 
     companion object {
-
 
         internal fun getDownloadDir(target: Project, config: CodeStyleConfig): File {
             return if (config.downloadDir.isBlank()) {
@@ -64,6 +65,30 @@ class CodeStylePlugin : Plugin<Project> {
                     }
                 }
             }
+        }
+
+
+        internal fun getCacheFolder(useCache: Boolean): File? {
+            if (!useCache) {
+                return null
+            }
+
+            val userHomePath = System.getProperty(USER_HOME)
+            if (userHomePath.isNullOrBlank()) {
+                return null
+            }
+
+            val userHome = File(userHomePath)
+            if (!userHome.exists()) {
+                return null
+            }
+
+            val gradleFolder = File(userHome, GRADLE_FOLDER)
+            if (!gradleFolder.exists()) {
+                return null
+            }
+
+            return File(userHome, CACHE_FOLDER)
         }
     }
 }

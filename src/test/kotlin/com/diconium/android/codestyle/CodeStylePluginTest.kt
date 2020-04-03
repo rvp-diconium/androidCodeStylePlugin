@@ -3,6 +3,7 @@ package com.diconium.android.codestyle
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -17,8 +18,12 @@ class CodeStylePluginTest {
     private lateinit var testHomeDir: File
     private lateinit var project: Project
 
+    // used on the `getCacheFolder` tests
+    private var originalUserHome: String? = null
+
     @Before
     fun setUp() {
+        originalUserHome = System.getProperty(USER_HOME)
         fun createFolder(f: File): File {
             f.mkdirs()
             f.deleteOnExit()
@@ -34,6 +39,8 @@ class CodeStylePluginTest {
 
     @After
     fun tearDown() {
+        originalUserHome?.let { System.setProperty(USER_HOME, it) }
+        originalUserHome = null
         testHomeDir.deleteRecursively()
     }
 
@@ -65,6 +72,47 @@ class CodeStylePluginTest {
         val dir = File(testHomeDir, "custom_location_2")
         val config = CodeStyleConfig().apply { downloadDir = dir.path }
         CodeStylePlugin.getDownloadDir(project, config)
+    }
+
+
+    @Test
+    fun getCacheFolder_returns_gradle_cache_folder_if_all_exist() {
+        // prepare file system for test
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
+        val gradleFolder = File(testHome, CACHE_FOLDER)
+        testHome.deleteOnExit()
+        gradleFolder.deleteOnExit()
+        gradleFolder.mkdirs()
+        System.setProperty(USER_HOME, testHome.absolutePath)
+
+        // test
+        val tested = CodeStylePlugin.getCacheFolder(true)
+        Assert.assertEquals(gradleFolder, tested)
+
+        gradleFolder.delete()
+        testHome.delete()
+
+    }
+
+    @Test
+    fun getCacheFolder_returns_null_if_any_does_not_exist() {
+        // prepare file system for test
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
+        testHome.deleteOnExit()
+        testHome.mkdirs()
+
+        // test 1 - no gradle folder
+        System.setProperty(USER_HOME, testHome.absolutePath)
+        Assert.assertNull(CodeStylePlugin.getCacheFolder(true))
+
+        // test 2 - no user home folder
+        testHome.delete()
+        Assert.assertNull(CodeStylePlugin.getCacheFolder(true))
+
+        // test 3 - no user home property
+        System.clearProperty(USER_HOME)
+        Assert.assertNull(CodeStylePlugin.getCacheFolder(true))
+
     }
 
 // https://stackoverflow.com/questions/60989927/test-custom-gradle-plugin-after-evaluate

@@ -139,7 +139,7 @@ class CachedDownloadHandler(
     companion object {
         internal fun downloadNow(
             downloads: Map<String, String>,
-            useCache: Boolean,
+            cacheDir: File?,
             force: Boolean,
             debug: Boolean,
             maxCacheAge: Long,
@@ -157,7 +157,7 @@ class CachedDownloadHandler(
                 maxCacheAge,
                 if (debug) ::println else ({}),
                 outputDir,
-                if (useCache) CachedDownloadTask.getCacheFolder() else null
+                cacheDir
             )
             downloads.forEach(downloader::execute)
         }

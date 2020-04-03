@@ -25,13 +25,13 @@ open class CachedDownloadTask : DefaultTask() {
     lateinit var downloads: Map<String, String>
 
     @Input
-    var useCache: Boolean = true
+    var cacheDir: String? = null
 
     @Input
     var force: Boolean = false
 
     @Input
-    var debug:Boolean = false
+    var debug: Boolean = false
 
     @Input
     var maxCacheAge: Long = MAX_CACHE_AGE
@@ -43,7 +43,7 @@ open class CachedDownloadTask : DefaultTask() {
     fun execute() {
         CachedDownloadHandler.downloadNow(
             downloads,
-            useCache,
+            cacheDir?.let { File(it) },
             force,
             debug,
             maxCacheAge,
@@ -52,25 +52,6 @@ open class CachedDownloadTask : DefaultTask() {
     }
 
     companion object {
-
-        internal fun getCacheFolder(): File? {
-            val userHomePath = System.getProperty(USER_HOME)
-            if (userHomePath.isNullOrBlank()) {
-                return null
-            }
-
-            val userHome = File(userHomePath)
-            if (!userHome.exists()) {
-                return null
-            }
-
-            val gradleFolder = File(userHome, GRADLE_FOLDER)
-            if (!gradleFolder.exists()) {
-                return null
-            }
-
-            return File(userHome, CACHE_FOLDER)
-        }
 
         internal val stringValidator: StringValidator = { file ->
             if (file.isBlank()) {
