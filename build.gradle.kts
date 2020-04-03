@@ -2,19 +2,19 @@ buildscript {
     repositories {
         mavenCentral()
         // for local testing:
-        mavenLocal()
+        // mavenLocal()
     }
     dependencies {
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.11.1")
         // for local testing:
-        classpath("com.diconium.android.codestyle:codestyle:0.1.0-SNAPSHOT")
+        // classpath("com.diconium.android.codestyle:codestyle:0.1.0-SNAPSHOT")
     }
 }
 
 apply {
     plugin("com.vanniktech.maven.publish")
     // for local testing:
-    plugin("com.diconium.android.codestyle")
+    // plugin("com.diconium.android.codestyle")
 }
 
 plugins {
@@ -23,13 +23,13 @@ plugins {
 }
 
 // for local testing:
-extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codestyle") {
-    downloads = mapOf(
-        "codeStyles/readme.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/README.md",
-        "main.java.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/main/src/main/java/com/budius/chromecast/converter/Main.java"
-    )
-    downloadDir = "$rootDir/.idea"
-}
+//extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codestyle") {
+//    downloads = mapOf(
+//        "codeStyles/readme.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/README.md",
+//        "main.java.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/main/src/main/java/com/budius/chromecast/converter/Main.java"
+//    )
+//    downloadDir = "$rootDir/.idea"
+//}
 
 repositories {
     mavenCentral()
