@@ -1,0 +1,28 @@
+.job_template: &general_job_configuration  # Hidden key that defines an anchor named 'general_job_configuration'
+  tags:
+    - diconium
+    - internal
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_JOB_STAGE"
+    expire_in: 1 week
+
+default:
+  image: openjdk:8-jdk-slim
+
+stages:
+  - build
+  - release
+
+buildTest:
+  <<: *general_job_configuration
+  stage: build
+  script:
+      - ./gradlew --console=plain cleanBuildTestJacoco
+      - echo Complete ===========================
+      - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' build/reports/jacoco/test/jacocoTestReport.csv
+  artifacts:
+    paths:
+      - 'build/libs'
+      - 'build/reports/jacoco/test/html'
+    reports:
+      junit: build/test-results/test/TEST-*.xml

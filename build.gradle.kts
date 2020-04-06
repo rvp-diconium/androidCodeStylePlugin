@@ -22,6 +22,16 @@ plugins {
     jacoco
 }
 
+
+
+tasks.jacocoTestReport {
+    reports {
+        xml.isEnabled = false
+        csv.isEnabled = true
+        html.isEnabled = true
+    }
+}
+
 // for local testing:
 //extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codestyle") {
 //    downloads = mapOf(
