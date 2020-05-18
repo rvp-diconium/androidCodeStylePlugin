@@ -95,6 +95,25 @@ class CodeStylePluginTest {
     }
 
     @Test
+    fun getCacheFolder_returns_null_if_useCache_is_false() {
+        // prepare file system for test
+        val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
+        val gradleFolder = File(testHome, CACHE_FOLDER)
+        testHome.deleteOnExit()
+        gradleFolder.deleteOnExit()
+        gradleFolder.mkdirs()
+        System.setProperty(USER_HOME, testHome.absolutePath)
+
+        // test
+        val tested = CodeStylePlugin.getCacheFolder(false)
+        Assert.assertNull(tested)
+
+        gradleFolder.delete()
+        testHome.delete()
+
+    }
+
+    @Test
     fun getCacheFolder_returns_null_if_any_does_not_exist() {
         // prepare file system for test
         val testHome = Files.createTempDirectory(TEST_FOLDER).toFile()
