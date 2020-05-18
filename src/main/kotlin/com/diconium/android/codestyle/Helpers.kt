@@ -69,15 +69,18 @@ object Helpers {
         }
     }
 
-    internal val fileDownloader: FileDownloader = { urlString, destination ->
-        var outputStream: OutputStream? = null
-        val conn: URLConnection
-        var inputStream: InputStream? = null
+    internal val fileDownloader: FileDownloader = { uriString, destination ->
+        val inputStream = if (uriString.startsWith("http")) {
+            safeUri(URI.create(uriString)).toURL().openConnection().getInputStream()
+        } else {
+            javaClass.getResourceAsStream(uriString)
+        }
+        val outputStream = BufferedOutputStream(FileOutputStream(destination))
+        streamCopy(inputStream, outputStream)
+    }
+
+    private fun streamCopy(inputStream: InputStream, outputStream: OutputStream) {
         try {
-            val url = safeUri(URI.create(urlString)).toURL()
-            outputStream = BufferedOutputStream(FileOutputStream(destination))
-            conn = url.openConnection()
-            inputStream = conn.getInputStream()
             val buffer = ByteArray(BUFFER_SIZE)
             var numRead: Int
             while (inputStream.read(buffer).also { numRead = it } != -1) {
@@ -88,8 +91,8 @@ object Helpers {
                 outputStream.write(buffer, 0, numRead)
             }
         } finally {
-            inputStream?.close()
-            outputStream?.close()
+            inputStream.close()
+            outputStream.close()
         }
     }
 
