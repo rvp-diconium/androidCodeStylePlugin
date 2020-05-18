@@ -5,7 +5,7 @@ open class CodeStyleConfig {
         "codeStyleConfig.xml" to "/codeStyles/codeStyleConfig.xml",
         "Project.xml" to "/codeStyles/Project.xml"
     )
-    var downloadDir: String = ".idea/codeStyles/"
+    var downloadDir: String = ""
     var useCache: Boolean = false
     var force: Boolean = false
     var maxCacheAge: Long = MAX_CACHE_AGE
