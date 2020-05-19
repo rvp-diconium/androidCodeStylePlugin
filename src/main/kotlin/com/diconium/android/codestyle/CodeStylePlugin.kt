@@ -4,9 +4,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
 
+const val EXTENSION_NAME = "codeStyle"
+
 class CodeStylePlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        val config = target.extensions.create("codestyle", CodeStyleConfig::class.java)
+        val config = target.extensions.create(EXTENSION_NAME, CodeStyleConfig::class.java)
         target.afterEvaluate {
 
             val cache = getCacheFolder(config.useCache)

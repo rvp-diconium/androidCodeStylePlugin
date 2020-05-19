@@ -36,7 +36,7 @@ tasks.jacocoTestReport {
 }
 
 // for local testing:
-//extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codestyle") {
+//extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codeStyle") {
 //    downloads = mapOf(
 //        "codeStyles/readme.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/README.md",
 //        "main.java.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/main/src/main/java/com/budius/chromecast/converter/Main.java"

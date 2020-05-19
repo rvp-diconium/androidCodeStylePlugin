@@ -1,6 +1,7 @@
 package com.diconium.android.codestyle
 
 import java.io.File
+import kotlin.system.measureTimeMillis
 
 class CachedDownloader(
     private val validateString: StringValidator,
@@ -17,7 +18,6 @@ class CachedDownloader(
     private val cacheDir: File?
 ) {
     internal fun execute(fileName: String, sourceUrl: String) {
-
         // validate inputs
         validateInputs(sourceUrl, fileName, outputDir, cacheDir)
         val destinationFile = File(outputDir, fileName)
@@ -26,7 +26,6 @@ class CachedDownloader(
         try {
             if (cacheDir != null) {
                 // runs with cache
-                log("Running downloader with cache")
                 val cacheFileName = generateCacheFileName(sourceUrl, fileName)
                 val cacheFile = File(cacheDir, cacheFileName)
                 tempFile = File(cacheDir, "$cacheFileName.tmp")
@@ -34,7 +33,6 @@ class CachedDownloader(
                 executeWithCache(sourceUrl, destinationFile, tempFile, cacheFile)
             } else {
                 // runs without cache
-                log("Running downloader without cache")
                 tempFile = File(outputDir, "$fileName.tmp")
                 tempFile.deleteOnExit()
                 executeWithoutCache(sourceUrl, destinationFile, tempFile)
@@ -136,6 +134,7 @@ class CachedDownloader(
             maxCacheAge: Long,
             outputDir: File
         ) {
+            val logger: Logger = if (debug) ::println else ({});
             val downloader = CachedDownloader(
                 Helpers.stringValidator,
                 Helpers.folderValidator,
@@ -146,11 +145,19 @@ class CachedDownloader(
                 Helpers.compareFiles,
                 force,
                 maxCacheAge,
-                if (debug) ::println else ({}),
+                logger,
                 outputDir,
                 cacheDir
             )
-            downloads.forEach(downloader::execute)
+            if (cacheDir != null) {
+                logger("Starting codeStyle download with cache");
+            } else {
+                logger("Starting codeStyle download without cache");
+            }
+            val executionTime = measureTimeMillis {
+                downloads.forEach(downloader::execute)
+            }
+            logger("codeStyle download executed in ${executionTime}ms");
         }
     }
 

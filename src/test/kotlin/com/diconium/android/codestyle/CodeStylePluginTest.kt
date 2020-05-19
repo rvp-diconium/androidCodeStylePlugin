@@ -46,9 +46,9 @@ class CodeStylePluginTest {
 
     @Test
     fun extension_config_is_created() {
-        val codestyle = project.extensions.findByName("codestyle")
-        assertNotNull(codestyle)
-        assertTrue(codestyle is CodeStyleConfig)
+        val codeStyle = project.extensions.findByName(EXTENSION_NAME)
+        assertNotNull(codeStyle)
+        assertTrue(codeStyle is CodeStyleConfig)
     }
 
     @Test
