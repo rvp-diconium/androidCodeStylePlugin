@@ -8,33 +8,21 @@ import java.io.File
 
 open class CachedDownloadTask : DefaultTask() {
 
-    @Input
-    lateinit var downloads: Map<String, String>
+	@Input lateinit var downloads: Map<String, String>
 
-    @Input
-    var cacheDir: String? = null
+	@Input var cacheDir: String? = null
 
-    @Input
-    var force: Boolean = false
+	@Input var force: Boolean = false
 
-    @Input
-    var debug: Boolean = false
+	@Input var debug: Boolean = false
 
-    @Input
-    var maxCacheAge: Long = MAX_CACHE_AGE
+	@Input var maxCacheAge: Long = MAX_CACHE_AGE
 
-    @OutputDirectory
-    lateinit var outputDir: File
+	@OutputDirectory lateinit var outputDir: File
 
-    @TaskAction
-    fun execute() {
-        CachedDownloader.downloadNow(
-            downloads,
-            cacheDir?.let { File(it) },
-            force,
-            debug,
-            maxCacheAge,
-            outputDir
-        )
-    }
+	@TaskAction fun execute() {
+		CachedDownloader.downloadNow(
+			downloads, cacheDir?.let { File(it) }, force, debug, maxCacheAge, outputDir
+		)
+	}
 }
