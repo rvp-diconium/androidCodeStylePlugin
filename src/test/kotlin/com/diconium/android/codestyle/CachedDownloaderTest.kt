@@ -358,17 +358,20 @@ class CachedDownloaderTest {
     @Test
     fun prepare_inputs_debug_logger_is_println() {
         val printlnLogger: Logger = ::println
+        val logger = CachedDownloader.getLogger(true)
+        assertEquals(printlnLogger, logger)
+    }
 
-        val (_, _, debugLogger) = CachedDownloader.prepareInputs(emptyMap(), cacheDir, true)
-        assertEquals(printlnLogger, debugLogger)
-
-        val (_, _, logger) = CachedDownloader.prepareInputs(mapOf("a" to "http://a"), cacheDir, false)
+    @Test
+    fun prepare_inputs_debug_logger_is_not_println() {
+        val printlnLogger: Logger = ::println
+        val logger = CachedDownloader.getLogger(false)
         assertNotEquals(printlnLogger, logger)
     }
 
     @Test
     fun prepare_inputs_when_empty_downloads() {
-        val (download, cache, _) = CachedDownloader.prepareInputs(emptyMap(), cacheDir, false)
+        val (download, cache) = CachedDownloader.prepareInputs(emptyMap(), cacheDir, ({}))
         assertEquals(
             mapOf(
                 "codeStyleConfig.xml" to "/codeStyles/codeStyleConfig.xml",
@@ -384,7 +387,7 @@ class CachedDownloaderTest {
             "a.xml" to "http://website/a.xml",
             "b.xml" to "http://website/b.xml"
         )
-        val (download, cache, _) = CachedDownloader.prepareInputs(downloadsInput, cacheDir, false)
+        val (download, cache) = CachedDownloader.prepareInputs(downloadsInput, cacheDir, ({}))
         assertEquals(downloadsInput, download)
         assertEquals(cacheDir, cache)
     }
@@ -392,7 +395,7 @@ class CachedDownloaderTest {
     @Test(expected = IllegalArgumentException::class)
     fun prepare_inputs_throws_when_inputs_are_not_http() {
         val downloadsInput = mapOf("a.xml" to "website/a.xml")
-        CachedDownloader.prepareInputs(downloadsInput, cacheDir, false)
+        CachedDownloader.prepareInputs(downloadsInput, cacheDir, ({}))
     }
 
     // helpers

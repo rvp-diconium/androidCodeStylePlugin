@@ -140,7 +140,8 @@ class CachedDownloader(
             maxCacheAge: Long,
             outputDir: File
         ) {
-            val (downloads, cacheDir, logger) = prepareInputs(downloadsInput, cacheDirInput, debug)
+            val logger = getLogger(debug)
+            val (downloads, cacheDir) = prepareInputs(downloadsInput, cacheDirInput, logger)
             val downloader = CachedDownloader(
                 Helpers.stringValidator,
                 Helpers.folderValidator,
@@ -155,11 +156,7 @@ class CachedDownloader(
                 outputDir,
                 cacheDir
             )
-            if (cacheDir != null) {
-                logger("Starting codeStyle download with cache");
-            } else {
-                logger("Starting codeStyle download without cache");
-            }
+            
             val executionTime = measureTimeMillis {
                 downloads.forEach(downloader::execute)
             }
@@ -169,23 +166,30 @@ class CachedDownloader(
         internal fun prepareInputs(
             downloadsInput: Map<String, String>,
             cacheDirInput: File?,
-            debug: Boolean
-        ): Triple<Map<String, String>, File?, Logger> {
-
-            // sets the logger depending on debug flag
-            val logger: Logger = if (debug) ::println else ({})
+            logger: Logger
+        ): Pair<Map<String, String>, File?> {
 
             // sets downloads map and cacheDir depending on downloads input
             return if (downloadsInput.isEmpty()) {
-                Triple(defaultDownloads, null, logger)
+                logger("Starting codeStyle sync with plugin internal values")
+                Pair(defaultDownloads, null)
             } else {
                 downloadsInput.values.forEach {
                     if (!it.startsWith("http")) {
                         throw IllegalArgumentException("Not a valid HTTP URL: $it")
                     }
                 }
-                Triple(downloadsInput, cacheDirInput, logger)
+                if (cacheDirInput == null) {
+                    logger("Starting codeStyle download without cache")
+                } else {
+                    logger("Starting codeStyle download with cache")
+                }
+                Pair(downloadsInput, cacheDirInput)
             }
+        }
+
+        internal fun getLogger(debug: Boolean): Logger {
+            return if (debug) ::println else ({})
         }
     }
 }

@@ -19,14 +19,12 @@ Configuration options are:
 ```
 codeStyle {
     debug = true / false (default to false)
-    maxCacheAge = 10 * 60 * 1000 (in millis) (default is 24h)
+    maxCacheAge = 10 * 60 * 1000 (in millis) (default to 24h)
     force = true / false (default to false)
-    useCache = true / false (default to false, 
-                                because default is the internaly packed, 
-                                so there's no need to cache it)
+    useCache = true / false (default to true)
     downloadDir = "some/folder/path/" (defaults to .idea/codeStyle)
 	downloads = [
 			"Project.xml": "https://some/location/yourfile.xml"
-	]
+	] (defaults to plugin internal code style)
 }
 ```
