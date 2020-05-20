@@ -8,15 +8,22 @@ buildscript {
     }
     dependencies {
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.11.1")
-        // for local testing:
+
+        // self-using the plugin
+        classpath(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+        classpath(files("libs/codestyle.jar"))
+        classpath("commons-codec:commons-codec:1.14")
+
+        // to test from ./gradlew installArchives
+        // first comment out the usage from the .jar file above
+        // and uncomment the line below
         // classpath("com.diconium.android.codestyle:codestyle:0.1.0-SNAPSHOT")
     }
 }
 
 apply {
     plugin("com.vanniktech.maven.publish")
-    // for local testing:
-    // plugin("com.diconium.android.codestyle")
+    plugin("com.diconium.android.codestyle")
 }
 
 plugins {
@@ -24,8 +31,6 @@ plugins {
     jacoco
     kotlin("jvm") version "1.3.72"
 }
-
-
 
 tasks.jacocoTestReport {
     reports {
@@ -35,14 +40,9 @@ tasks.jacocoTestReport {
     }
 }
 
-// for local testing:
-//extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codeStyle") {
-//    downloads = mapOf(
-//        "codeStyles/readme.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/README.md",
-//        "main.java.txt" to "https://raw.githubusercontent.com/budius/ChromecastConverter/master/main/src/main/java/com/budius/chromecast/converter/Main.java"
-//    )
-//    downloadDir = "$rootDir/.idea"
-//}
+extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codeStyle") {
+    debug = true
+}
 
 repositories {
     mavenCentral()
