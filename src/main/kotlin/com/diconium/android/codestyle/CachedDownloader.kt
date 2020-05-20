@@ -141,12 +141,12 @@ class CachedDownloader(
             outputDir: File
         ) {
             val logger = getLogger(debug)
-            val (downloads, cacheDir) = prepareInputs(downloadsInput, cacheDirInput, logger)
+            val (downloads, cacheDir, fileDownloader) = prepareInputs(downloadsInput, cacheDirInput, logger)
             val downloader = CachedDownloader(
                 Helpers.stringValidator,
                 Helpers.folderValidator,
                 Helpers.cacheNameGenerator,
-                Helpers.fileDownloader,
+                fileDownloader,
                 Helpers.fileCopier,
                 Helpers.fileMover,
                 Helpers.compareFiles,
@@ -156,7 +156,7 @@ class CachedDownloader(
                 outputDir,
                 cacheDir
             )
-            
+
             val executionTime = measureTimeMillis {
                 downloads.forEach(downloader::execute)
             }
@@ -167,12 +167,12 @@ class CachedDownloader(
             downloadsInput: Map<String, String>,
             cacheDirInput: File?,
             logger: Logger
-        ): Pair<Map<String, String>, File?> {
+        ): Triple<Map<String, String>, File?, FileDownloader> {
 
             // sets downloads map and cacheDir depending on downloads input
             return if (downloadsInput.isEmpty()) {
                 logger("Starting codeStyle sync with plugin internal values")
-                Pair(defaultDownloads, null)
+                Triple(defaultDownloads, null, Helpers.resourceFileDownloader)
             } else {
                 downloadsInput.values.forEach {
                     if (!it.startsWith("http")) {
@@ -184,7 +184,7 @@ class CachedDownloader(
                 } else {
                     logger("Starting codeStyle download with cache")
                 }
-                Pair(downloadsInput, cacheDirInput)
+                Triple(downloadsInput, cacheDirInput, Helpers.httpFileDownloader)
             }
         }
 

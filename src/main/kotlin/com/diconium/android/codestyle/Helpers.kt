@@ -69,12 +69,14 @@ object Helpers {
         }
     }
 
-    internal val fileDownloader: FileDownloader = { uriString, destination ->
-        val inputStream = if (uriString.startsWith("http")) {
-            safeUri(URI.create(uriString)).toURL().openConnection().getInputStream()
-        } else {
-            javaClass.getResourceAsStream(uriString)
-        }
+    internal val httpFileDownloader: FileDownloader = { uriString, destination ->
+        val inputStream = safeUri(URI.create(uriString)).toURL().openConnection().getInputStream()
+        val outputStream = BufferedOutputStream(FileOutputStream(destination))
+        streamCopy(inputStream, outputStream)
+    }
+
+    internal val resourceFileDownloader: FileDownloader = { uriString, destination ->
+        val inputStream = javaClass.getResourceAsStream(uriString)
         val outputStream = BufferedOutputStream(FileOutputStream(destination))
         streamCopy(inputStream, outputStream)
     }
