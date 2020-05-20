@@ -126,15 +126,21 @@ class CachedDownloader(
     }
 
     companion object {
+
+        private val defaultDownloads = mapOf(
+            "codeStyleConfig.xml" to "/codeStyles/codeStyleConfig.xml",
+            "Project.xml" to "/codeStyles/Project.xml"
+        )
+
         internal fun downloadNow(
-            downloads: Map<String, String>,
-            cacheDir: File?,
+            downloadsInput: Map<String, String>,
+            cacheDirInput: File?,
             force: Boolean,
             debug: Boolean,
             maxCacheAge: Long,
             outputDir: File
         ) {
-            val logger: Logger = if (debug) ::println else ({});
+            val (downloads, cacheDir, logger) = prepareInputs(downloadsInput, cacheDirInput, debug)
             val downloader = CachedDownloader(
                 Helpers.stringValidator,
                 Helpers.folderValidator,
@@ -159,6 +165,27 @@ class CachedDownloader(
             }
             logger("codeStyle download executed in ${executionTime}ms");
         }
-    }
 
+        internal fun prepareInputs(
+            downloadsInput: Map<String, String>,
+            cacheDirInput: File?,
+            debug: Boolean
+        ): Triple<Map<String, String>, File?, Logger> {
+
+            // sets the logger depending on debug flag
+            val logger: Logger = if (debug) ::println else ({})
+
+            // sets downloads map and cacheDir depending on downloads input
+            return if (downloadsInput.isEmpty()) {
+                Triple(defaultDownloads, null, logger)
+            } else {
+                downloadsInput.values.forEach {
+                    if (!it.startsWith("http")) {
+                        throw IllegalArgumentException("Not a valid HTTP URL: $it")
+                    }
+                }
+                Triple(downloadsInput, cacheDirInput, logger)
+            }
+        }
+    }
 }
