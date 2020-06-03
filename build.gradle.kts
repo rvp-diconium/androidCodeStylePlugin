@@ -41,7 +41,6 @@ tasks.jacocoTestReport {
 
 extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codeStyle") {
 	debug = true
-	downloadDir = ".idea/modules/codestyle"
 }
 
 repositories {
