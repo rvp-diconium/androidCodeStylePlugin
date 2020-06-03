@@ -7,8 +7,6 @@ The default is the internally supplied `Project.xml` and `codeStyleConfig.xml`.
 Using the `codeStyle {` closure, it can be configured to download those files from any online location.
  (e.g. a Github gist).  
  The files will be cached in the gradle cache folder.
- 
-See all the configuration parameters below.  
 
 ## Using
 
