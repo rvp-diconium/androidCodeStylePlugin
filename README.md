@@ -6,9 +6,17 @@ Automatically applies the code style to the project.
 
 ### From *.jar
 - move the jar to libs on root
-- add to `buildscript.dependencies`: `classpath fileTree(include: ['*.jar'], dir: 'libs')`
-- add to `buildscript.dependencies`: `classpath files('codestyle.jar')`
-- apply the plugin: `apply plugin: "com.diconium.android.codestyle"`
+- add to the root build.gradle the buildscript dependencies and apply plugin
+```
+buildscript {
+  dependencies {
+    classpath fileTree(include: ['*.jar'], dir: 'libs')
+    classpath files('codestyle.jar')
+  }
+}
+
+apply plugin: "com.diconium.android.codestyle"
+```
 
 ### From Maven
 TODO:
