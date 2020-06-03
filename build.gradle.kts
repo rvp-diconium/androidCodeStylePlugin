@@ -5,14 +5,13 @@ buildscript {
 		mavenCentral()
 		// for local testing:
 		// mavenLocal()
+		maven("https://jitpack.io")
 	}
 	dependencies {
 		classpath("com.vanniktech:gradle-maven-publish-plugin:0.11.1")
 
 		// self-using the plugin
-		classpath(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-		classpath(files("libs/codestyle.jar"))
-		classpath("commons-codec:commons-codec:1.14")
+		classpath("com.github.rvp-diconium:androidcCodeStylePlugin:1.0.0")
 
 		// to test from ./gradlew installArchives
 		// first comment out the usage from the .jar file above
@@ -42,6 +41,7 @@ tasks.jacocoTestReport {
 
 extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codeStyle") {
 	debug = true
+	downloadDir = ".idea/modules/codestyle"
 }
 
 repositories {
