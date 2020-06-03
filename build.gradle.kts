@@ -43,6 +43,10 @@ extensions.configure<com.diconium.android.codestyle.CodeStyleConfig>("codeStyle"
 	debug = true
 }
 
+extensions.configure<com.vanniktech.maven.publish.MavenPublishPluginExtension>("mavenPublish") {
+	releaseSigningEnabled = false
+}
+
 repositories {
 	mavenCentral()
 	jcenter()
