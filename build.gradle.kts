@@ -11,12 +11,12 @@ buildscript {
 		classpath("com.vanniktech:gradle-maven-publish-plugin:0.11.1")
 
 		// self-using the plugin
-		classpath("com.github.rvp-diconium:androidcCodeStylePlugin:1.0.0")
+		classpath("com.github.rvp-diconium:androidCodeStylePlugin:1.0.3")
 
 		// to test from ./gradlew installArchives
 		// first comment out the usage from the .jar file above
 		// and uncomment the line below
-		// classpath("com.diconium.android.codestyle:codestyle:0.1.0-SNAPSHOT")
+		// classpath("com.diconium.android.codestyle:codestyle:<version>")
 	}
 }
 
