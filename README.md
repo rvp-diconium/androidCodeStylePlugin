@@ -20,7 +20,7 @@ buildscript {
     maven { url 'https://jitpack.io' }
   }
   dependencies {
-    classpath 'com.github.rvp-diconium:androidcCodeStylePlugin:1.0.0'
+    classpath 'com.github.rvp-diconium:androidcCodeStylePlugin:<latest>'
   }
 }
 
